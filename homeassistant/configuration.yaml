@@ -1,0 +1,32 @@
+# Prusa Enclosure - Home Assistant Configuration
+
+mqtt:
+  sensor:
+    - name: "Prusa Enclosure Temperature"
+      state_topic: "prusa/enclosure/state"
+      unit_of_measurement: "°C"
+      value_template: "{{ value_json.temperature }}"
+      
+    - name: "Prusa Enclosure VOC"
+      state_topic: "prusa/enclosure/state"
+      unit_of_measurement: "ppb"
+      value_template: "{{ value_json.voc }}"
+      
+  switch:
+    - name: "Prusa Enclosure Power"
+      state_topic: "prusa/enclosure/state"
+      command_topic: "prusa/enclosure/command"
+      value_template: "{{ value_json.enabled }}"
+      payload_on: '{"power": true}'
+      payload_off: '{"power": false}'
+
+automation:
+  - alias: "High VOC Alert"
+    trigger:
+      platform: numeric_state
+      entity_id: sensor.prusa_enclosure_voc
+      above: 5000
+    action:
+      service: notify.mobile_app
+      data:
+        message: "High VOC level detected!"
